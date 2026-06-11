@@ -175,6 +175,6 @@ above CTCF and H3K27ac signal tracks, with highlighted anchor positions
 providing positional context. Because all tracks share the same `pgParams`
 object, coordinates are guaranteed to be aligned across the full figure.
 
-```{r, echo=FALSE, out.width="100%"}
+```{r, echo=FALSE, eval = TRUE, out.width="100%"}
 knitr::include_graphics("../man/figures/survey_communities.png")
 ```
