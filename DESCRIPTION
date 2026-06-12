@@ -8,8 +8,9 @@ Authors@R: person("Sarah", "Parker", role = c("aut", "cre"),
 Description: Tools for assigning and visualizing chromatin community interactions from Hi-C data.
 License: AGPL (>= 3)
 Encoding: UTF-8
-Suggests: 
+Suggests:
     knitr,
+    loopcityData,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
