@@ -14,7 +14,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-RoxygenNote: 7.3.2
 Imports: 
     BiocGenerics,
     clustAnalytics,
@@ -34,12 +33,13 @@ Imports:
     rlang,
     stats,
     S4Vectors
-Remotes:
-    ericsdavis/mariner
-Depends: 
-    R (>= 3.5.0)
-LazyData: true
-URL: 
+Depends:
+    R (>= 4.1.0)
+biocViews: Software, HiC, Sequencing, Epigenetics, Network, Clustering,
+    Visualization
+BugReports: https://github.com/sarmapar/loopcity/issues
+URL:
     https://sarmapar.com/loopcity/,
     https://github.com/sarmapar/loopcity
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

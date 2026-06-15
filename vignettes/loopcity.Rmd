@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r knitr-opts, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -119,13 +119,13 @@ The `GInteractions` object stored inside `score` can then be used to assign comm
 
 This network is then passed through a clustering algorithm. The default algorithm is leiden, but other options include "fast_greedy", "walktrap", "infomap", "label_prop", or "edge_betweenness". This assigns each loop anchor to a community, and any nodes that are closely bordering a neighboring community are evaluated to determine if they should be included in both communities. If the average score of the border anchor and all anchors in the neighboring community is greater than the average score of all interactions between all the anchors in the current community, then the anchor is assigned to both the original and neighboring community. Loops are assigned to a community if both anchors of the loop are in the same community.
 
-```{r }
+```{r assignCommunities}
 communities <- assignCommunities(InteractionSet::interactions(scores))
 ```
 
 To see the pruning value used to remove edges from the network, run the following code
 
-```{r}
+```{r pruningValue}
 S4Vectors::metadata(communities)$pruningValue
 ```
 
@@ -159,6 +159,6 @@ plotHicCommunities(pdfName = "plot.pdf",
 
 ![](img/plot.png){width="100%"}
 
-```{r}
+```{r sessionInfo}
 sessionInfo()
 ```

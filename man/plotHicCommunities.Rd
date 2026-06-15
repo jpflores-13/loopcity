@@ -36,10 +36,31 @@ plot, where values greater than `zmax` will be set to`zmax`}
 
 \item{colorPalette}{a function corresponding to a color palette}
 }
+\value{
+Called for side effects. Creates a multi-page PDF at \code{pdfName}.
+}
 \description{
 If a vector of starts and ends is provided, one page will be generated
 per region.
 }
 \examples{
-add example
+hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+
+\donttest{
+communities <- GM12878_10KbLoops |>
+    mergeAnchors() |>
+    connectLoopAnchors(overlapDist = 1e6) |>
+    scoreInteractions(hicFile = hicFile) |>
+    InteractionSet::interactions() |>
+    assignCommunities()
+
+plotHicCommunities(
+    pdfName = tempfile(fileext = ".pdf"),
+    communities = communities,
+    hicFile = hicFile,
+    chroms = 22,
+    starts = 25e6,
+    ends = 30e6
+)
+}
 }

@@ -27,7 +27,7 @@ setGeneric("scoreInteractions",
                     bgSize = 5,
                     pseudo = 5,
                     pruneUnder = 0,
-                    truncate = F,
+                    truncate = FALSE,
                     resolution,
                     norm = "NONE")
                standardGeneric("scoreInteractions"))
@@ -64,7 +64,7 @@ setGeneric("scoreInteractions",
 
     ## Function to divide median of fg and bg with pseudocounts
     scoringFunction <- function(fg,bg,pseudo=pseudo){
-        median((fg + 1 + pseudo)/(bg + 1 + pseudo), na.rm = T)
+        median((fg + 1 + pseudo)/(bg + 1 + pseudo), na.rm = TRUE)
     }
 
     ## Calculate enrichment scores
@@ -116,7 +116,7 @@ setGeneric("scoreInteractions",
 
     ## pull hi-c contacts
     ## Set params
-    buffer = fgSize + bgGap + bgSize
+    buffer <- fgSize + bgGap + bgSize
 
     ## Extract matrices around each loop
     mats <- mariner::pixelsToMatrices(x=x, buffer=buffer) |>
@@ -179,6 +179,8 @@ setGeneric("scoreInteractions",
 #'  for each file in `files`.
 #'  Required only if GInteractions object is supplied for x.
 #'
+#' @return An object of the same class as \code{x} with a \code{score} column
+#' added to \code{mcols}.
 #' @importFrom mariner calcLoopEnrichment
 #' @rdname scoreInteractions
 #' @export

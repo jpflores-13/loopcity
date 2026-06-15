@@ -10,8 +10,7 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment  = "#>",
-  eval     = FALSE
+  comment  = "#>"
 )
 ```
 
@@ -31,7 +30,7 @@ loop communities on chromosome 1 (110–115 Mb).
 
 ## Run the loopcity pipeline
 
-```{r pipeline}
+```{r pipeline, eval=FALSE}
 library(loopcity)
 library(loopcityData)
 library(data.table)
@@ -60,7 +59,7 @@ Once communities are assigned, they can be plotted alongside any
 plotgardener-supported data track. Here we add CTCF and H3K27ac
 ChIP-seq signal tracks beneath the Hi-C map and community arches.
 
-```{r visualization}
+```{r visualization, eval=FALSE}
 library(plotgardener)
 library(glue)
 
@@ -175,3 +174,7 @@ The resulting figure shows loop communities as coloured arches directly
 above CTCF and H3K27ac signal tracks, with highlighted anchor positions
 providing positional context. Because all tracks share the same `pgParams`
 object, coordinates are guaranteed to be aligned across the full figure.
+
+```{r sessionInfo}
+sessionInfo()
+```
