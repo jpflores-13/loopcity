@@ -125,7 +125,7 @@ assignCommunities <- function(loops,
             }
 
             ## set pruneUnder to the median score of original loops
-            pruneUnder = median(originalLoops$score)
+            pruneUnder <- median(originalLoops$score)
 
         } else {
             ## error if no value provided and no source column
@@ -144,16 +144,15 @@ assignCommunities <- function(loops,
         scores[scores < pruneUnder] <- NA
     }
 
-    message(paste0("Pruning added loops with a score less than ",
-                   pruneUnder))
+    message(glue("Pruning added loops with a score less than {pruneUnder}"))
 
     ## Set nodes to anchors and edges to scores
     anc <- InteractionSet::anchors(loops, type="both", id=TRUE)
 
-    relations = data.frame(from = anc$first,
-                           to = anc$second,
-                           weights = scores,
-                           chr = mariner::seqnames1(loops))
+    relations <- data.frame(from = anc$first,
+                            to = anc$second,
+                            weights = scores,
+                            chr = mariner::seqnames1(loops))
 
     relations[is.na(relations)] <- 0
 
@@ -220,7 +219,7 @@ assignCommunities <- function(loops,
                    edge_betweenness =
                        igraph::cluster_edge_betweenness(g_filter,
                                                         weights = flippedWeights,
-                                                        directed = F),
+                                                        directed = FALSE),
                    connected_components =
                        igraph::components(g_filter)
             )
@@ -270,16 +269,17 @@ assignCommunities <- function(loops,
             dplyr::filter(anchorCommunity == comm) |>
             plyranges::as_granges()
 
-        ln <- .compareNodeToComm(loops, nodeLeft, T)
-        rn <- .compareNodeToComm(loops, nodeRight, F)
+        ln <- .compareNodeToComm(loops, nodeLeft, TRUE)
+        rn <- .compareNodeToComm(loops, nodeRight, FALSE)
 
         movement <- c(movement, ln, rn)
     }
 
     ## filter to only anchors that moved
     if(length(movement) > 0){
-        movement <- movement[which(sapply(movement$anchorCommunity,
-                                          function(x) length(x) > 1))]
+        movement <- movement[which(vapply(movement$anchorCommunity,
+                                          function(x) length(x) > 1,
+                                          logical(1)))]
     }
 
     ## reassign anchor communities

@@ -15,10 +15,29 @@
 #' plot, where values greater than `zmax` will be set to`zmax`
 #' @param colorPalette a function corresponding to a color palette
 #'
+#' @return Called for side effects. Creates a multi-page PDF at \code{pdfName}.
 #' @export
 #'
 #' @examples
-#' add example
+#' hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+#'
+#' \donttest{
+#' communities <- GM12878_10KbLoops |>
+#'     mergeAnchors() |>
+#'     connectLoopAnchors(overlapDist = 1e6) |>
+#'     scoreInteractions(hicFile = hicFile) |>
+#'     InteractionSet::interactions() |>
+#'     assignCommunities()
+#'
+#' plotHicCommunities(
+#'     pdfName = tempfile(fileext = ".pdf"),
+#'     communities = communities,
+#'     hicFile = hicFile,
+#'     chroms = 22,
+#'     starts = 25e6,
+#'     ends = 30e6
+#' )
+#' }
 plotHicCommunities <- function(pdfName, communities, hicFile, norm = "SCALE",
                             chroms, starts, ends, zmax, colorPalette){
 #### parameter checking --------------------------------------------------------
@@ -51,7 +70,7 @@ plotHicCommunities <- function(pdfName, communities, hicFile, norm = "SCALE",
 
     pdf(pdfName, width = pageWidth, height = pageHeight)
 
-    for(i in 1:length(chroms)){
+    for(i in seq_along(chroms)){
         # set region to current chr, start, end
         chr = chroms[i]
         start = starts[i]
@@ -83,7 +102,7 @@ plotHicCommunities <- function(pdfName, communities, hicFile, norm = "SCALE",
         # make plot
         plotgardener::pageCreate(width = pageWidth,
                                  height = pageHeight,
-                                 showGuides = F)
+                                 showGuides = FALSE)
         # hic plot
         hicPlot <- plotgardener::plotHicRectangle(data = hicFile,
                                                   chrom = chr,
@@ -111,7 +130,7 @@ plotHicCommunities <- function(pdfName, communities, hicFile, norm = "SCALE",
 
         # if `source` column exists, annotate pixels
         # gray box = added loop, black box = original loop
-        noSource = F
+        noSource <- FALSE
         if(is.null(windowLoops$source)){
             rlang::warn(glue::glue("Cannot differentiate added vs original ",
                                    "loops in annotated pixels or arches,",
@@ -121,7 +140,7 @@ plotHicCommunities <- function(pdfName, communities, hicFile, norm = "SCALE",
             S4Vectors::mcols(tempLoops) <- NULL
             plotgardener::annoPixels(hicPlot, tempLoops)
 
-            noSource = T
+            noSource <- TRUE
         } else {
             # annotating original loops
             originalLoops <- windowLoops[which(as.logical(

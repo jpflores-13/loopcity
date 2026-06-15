@@ -1,4 +1,15 @@
 url: http://www.sarmapar.com/loopcity/
 template:
   bootstrap: 5
+navbar:
+  structure:
+    left: [intro, articles, reference]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Get started
+        href: articles/loopcity.html
+      - text: Integrating with plotgardener
+        href: articles/plotgardener-integration.html
 

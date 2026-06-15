@@ -16,13 +16,15 @@
 #' @param dropDups logical determining whether duplicates should be dropped
 #'  from output
 #'
+#' @return A GInteractions object with loop anchors merged into representative
+#' positions.
 #' @export
 #'
 #' @examples
 #' mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
 #'
 
-mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = T){
+mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
     ## Suppress NSE notes in R CMD check
     subjectHits <- queryHits <- V1 <- anchorId <- overlapIds <- NULL
     sameGroup <- group <- count <- NULL
