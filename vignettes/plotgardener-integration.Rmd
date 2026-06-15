@@ -33,13 +33,14 @@ loop communities on chromosome 1 (110–115 Mb).
 
 ```{r pipeline}
 library(loopcity)
+library(loopcityData)
 library(data.table)
 library(GenomeInfoDb)
 library(InteractionSet)
 library(mariner)
 
-hic_file   <- "data/processed/hic/GSE214123_MEGA_K562_WT_0_inter.hic"
-loops_file <- "data/processed/hic/5kbLoops_0.txt"
+hic_file   <- K562_hic()
+loops_file <- K562_loops()
 
 loops <- data.table::fread(loops_file) |>
     mariner::assignToBins(binSize = 10e3)
@@ -64,8 +65,8 @@ library(plotgardener)
 library(glue)
 
 ## File paths
-ctcf_bw    <- "data/processed/chip/GSE213908_MERGE_MEGA_ChIP_CTCF_K562_WT_PMA_0_S.bw"
-h3k27ac_bw <- "data/processed/chip/GSE213908_MERGE_MEGA_ChIP_H3K27_K562_WT_PMA_0_S.bw"
+ctcf_bw    <- K562_CTCF_bw()
+h3k27ac_bw <- K562_H3K27ac_bw()
 
 ## Region of interest — matches Figure 1b/c
 hic_chrom         <- "1"

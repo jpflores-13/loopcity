@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 
 ```{r setup, include = FALSE}
 library(loopcity)
+library(loopcityData)
 ```
 
 # Installation
@@ -36,20 +37,25 @@ While `loopcity` functions can be used in isolation, they are more powerful used
 
 ## Starting with a loop file
 
-If you have a `.txt` file of loop calls, these can be converted to a `GInteractions` object using the package `mariner`. Loopcity requires loop anchors to be binned to the same size, so loops can also be binned using `assignToBins` which accepts a loop file, BEDPE-formatted 'data.frame'-like object, or GInteractions object.
+If you have a raw `.txt` loop call file, you can convert it with `mariner`:
 
-```{r preprocessLoops}
-loopFile <- "../data/GM12878_10KbLoops.txt"
+```{r preprocessLoopsRaw, eval=FALSE}
+loopFile <- "path/to/your/loops.txt"
 
-## To read in loop file as-is, use `as_ginteractions`
+## Read as-is
 loops <- read.table(loopFile) |>
     mariner::as_ginteractions()
 
-
-## To bin loops to a certain size, use `assignToBins`
+## Or bin anchors to a fixed resolution
 loops <- read.table(loopFile) |>
     mariner::assignToBins(binSize = 10e3)
+```
 
+For this vignette we use the GM12878 10 kb loop calls shipped with `loopcityData`:
+
+```{r preprocessLoops}
+data(GM12878_10KbLoops)
+loops <- GM12878_10KbLoops
 ```
 
 ## Step 1: Merge Loop Anchors using `mergeAnchors`
