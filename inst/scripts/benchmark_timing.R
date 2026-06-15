@@ -11,7 +11,7 @@
 #              10 kb resolution.
 # Input:       data/processed/hic/GSE214123_MEGA_K562_WT_0_inter.hic
 #              data/processed/hic/5kbLoops_0.txt (K562 loop calls)
-# Output:      figures/benchmark_timing.pdf
+# Output:      man/figures/benchmark_timing.pdf
 #              data/processed/benchmark_timing.rds
 #              prints manuscript sentence to console
 # -------------------------------------------------------------------------
@@ -168,8 +168,16 @@ p_timing <- ggplot(timing, aes(x = median_s, y = step)) +
   geom_col(fill = bar_fill, width = 0.65) +
   geom_errorbar(aes(xmin = q25_s, xmax = q75_s),
                 width = 0.25, linewidth = 0.4, color = "grey30") +
-  geom_text(aes(label = round(median_s, 1)),
-            hjust = -0.2, size = 3, family = "mono") +
+  geom_text(
+    data = ~subset(.x, !step %in% c("scoreInteractions", "Total")),
+    aes(label = round(median_s, 1)),
+    hjust = -0.2, size = 3, family = "mono"
+  ) +
+  geom_text(
+    data = ~subset(.x, step %in% c("scoreInteractions", "Total")),
+    aes(label = round(median_s, 1)),
+    hjust = -0.2, size = 3, family = "mono", nudge_y = 0.35
+  ) +
   scale_y_discrete(labels = step_labels) +
   scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
   labs(
@@ -216,7 +224,7 @@ The full loopcity pipeline completed in {total_min_wg} minutes on the ",
 saveRDS(timing, file = file.path(output_data, "benchmark_timing.rds"))
 
 ggsave(
-  filename = file.path(project_dir, "figures/benchmark_timing.pdf"),
+  filename = file.path(project_dir, "man/figures/benchmark_timing.pdf"),
   plot     = p_timing,
   width    = 5,
   height   = 4

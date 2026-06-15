@@ -2,7 +2,7 @@
 title: "Visualizing loop communities with `plotgardener`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Visualizing loop communities with `plotgardener`}
+  %\VignetteIndexEntry{Integrating loop communities with genomic data tracks}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -41,10 +41,6 @@ library(mariner)
 hic_file   <- "data/processed/hic/GSE214123_MEGA_K562_WT_0_inter.hic"
 loops_file <- "data/processed/hic/5kbLoops_0.txt"
 
-## Once loopcityData is available on Bioconductor, use instead:
-# hic_file   <- loopcityData::K562_hic()
-# loops_file <- loopcityData::K562_loops()
-
 loops <- data.table::fread(loops_file) |>
     mariner::assignToBins(binSize = 10e3)
 GenomeInfoDb::seqlevelsStyle(loops) <- "ENSEMBL"
@@ -70,10 +66,6 @@ library(glue)
 ## File paths
 ctcf_bw    <- "data/processed/chip/GSE213908_MERGE_MEGA_ChIP_CTCF_K562_WT_PMA_0_S.bw"
 h3k27ac_bw <- "data/processed/chip/GSE213908_MERGE_MEGA_ChIP_H3K27_K562_WT_PMA_0_S.bw"
-
-## Once loopcityData is available on Bioconductor, use instead:
-# ctcf_bw    <- loopcityData::K562_CTCF_bw()
-# h3k27ac_bw <- loopcityData::K562_H3K27ac_bw()
 
 ## Region of interest — matches Figure 1b/c
 hic_chrom         <- "1"
@@ -182,7 +174,3 @@ The resulting figure shows loop communities as coloured arches directly
 above CTCF and H3K27ac signal tracks, with highlighted anchor positions
 providing positional context. Because all tracks share the same `pgParams`
 object, coordinates are guaranteed to be aligned across the full figure.
-
-```{r figure, echo=FALSE, eval=TRUE, out.width="100%"}
-knitr::include_graphics("../man/figures/survey_communities.png")
-```
