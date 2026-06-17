@@ -21,13 +21,16 @@
 #' @export
 #'
 #' @examples
-#' hicFile <- "inst/extdata/GM12878_chr22.hic"
-#'
-#' mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-#' connections <- connectLoopAnchors(mergedLoops, 1e6)
-#' scores <- scoreInteractions(connections, hicFile, mergedLoops)
-#'
-#' assignCommunities(interactions(scores))
+#' \donttest{
+#' if (requireNamespace("loopcityData", quietly = TRUE)) {
+#'     data(GM12878_10KbLoops, package = "loopcityData")
+#'     hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+#'     mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
+#'     connections <- connectLoopAnchors(mergedLoops, 1e6)
+#'     scores <- scoreInteractions(connections, hicFile)
+#'     assignCommunities(InteractionSet::interactions(scores))
+#' }
+#' }
 assignCommunities <- function(loops,
                               scores,
                               clusterType = "leiden",

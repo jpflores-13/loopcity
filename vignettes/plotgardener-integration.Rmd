@@ -1,5 +1,5 @@
 ---
-title: "Visualizing loop communities with `plotgardener`"
+title: "Integrating loop communities with genomic data tracks"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Integrating loop communities with genomic data tracks}

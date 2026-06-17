@@ -8,9 +8,11 @@
 #' @export
 #'
 #' @examples
-#' mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-#'
-#' connectLoopAnchors(mergedLoops, 1e6)
+#' if (requireNamespace("loopcityData", quietly = TRUE)) {
+#'     data(GM12878_10KbLoops, package = "loopcityData")
+#'     mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
+#'     connectLoopAnchors(mergedLoops, 1e6)
+#' }
 connectLoopAnchors <- function(loops, overlapDist){
     ## Suppress NSE notes in R CMD check
     queryHits <- subjectHits <- NULL

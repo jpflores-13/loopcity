@@ -13,7 +13,9 @@ Tools for assigning and visualizing chromatin community interactions from Hi-C d
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://www.sarmapar.com/loopcity/}
+  \item \url{https://sarmapar.com/loopcity/}
+  \item \url{https://github.com/sarmapar/loopcity}
+  \item Report bugs at \url{https://github.com/sarmapar/loopcity/issues}
 }
 
 }

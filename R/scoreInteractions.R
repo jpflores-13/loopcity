@@ -16,7 +16,7 @@
 }
 
 ## Generic for scoreInteractions
-#' @rdname calcLoopEnrichment
+#' @rdname scoreInteractions
 #' @export
 setGeneric("scoreInteractions",
            function(x,
@@ -186,12 +186,15 @@ setGeneric("scoreInteractions",
 #' @export
 #'
 #' @examples
-#' hicFile <- "inst/extdata/GM12878_chr22.hic"
-#'
-#' mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-#' connections <- connectLoopAnchors(mergedLoops, 1e6)
-#'
-#' scoreInteractions(connections, hicFile, mergedLoops)
+#' \donttest{
+#' if (requireNamespace("loopcityData", quietly = TRUE)) {
+#'     data(GM12878_10KbLoops, package = "loopcityData")
+#'     hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+#'     mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
+#'     connections <- connectLoopAnchors(mergedLoops, 1e6)
+#'     scoreInteractions(connections, hicFile)
+#' }
+#' }
 #'
 setMethod("scoreInteractions",
           signature(x="GInteractions",

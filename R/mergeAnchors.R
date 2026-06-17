@@ -21,8 +21,10 @@
 #' @export
 #'
 #' @examples
-#' mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
-#'
+#' if (requireNamespace("loopcityData", quietly = TRUE)) {
+#'     data(GM12878_10KbLoops, package = "loopcityData")
+#'     mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
+#' }
 
 mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
     ## Suppress NSE notes in R CMD check

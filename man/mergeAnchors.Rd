@@ -5,7 +5,7 @@
 \title{Merge neighboring loop anchor positions into one
  representative anchor.}
 \usage{
-mergeAnchors(loops, pixelOverlap = 1, dropDups = T)
+mergeAnchors(loops, pixelOverlap = 1, dropDups = TRUE)
 }
 \arguments{
 \item{loops}{GInteractions object of loops from Hi-C data}
@@ -19,6 +19,10 @@ be merged}
 \item{dropDups}{logical determining whether duplicates should be dropped
 from output}
 }
+\value{
+A GInteractions object with loop anchors merged into representative
+positions.
+}
 \description{
 The representative anchor is chosen as the mode of a set of
  neighboring anchors. If there are no modes, the middle-most anchor of the
@@ -28,6 +32,8 @@ The representative anchor is chosen as the mode of a set of
  break ties.
 }
 \examples{
-mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
-
+if (requireNamespace("loopcityData", quietly = TRUE)) {
+    data(GM12878_10KbLoops, package = "loopcityData")
+    mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
+}
 }
