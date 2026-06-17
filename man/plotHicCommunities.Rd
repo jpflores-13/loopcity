@@ -44,24 +44,20 @@ If a vector of starts and ends is provided, one page will be generated
 per region.
 }
 \examples{
-\donttest{
-if (requireNamespace("loopcityData", quietly = TRUE)) {
-    data(GM12878_10KbLoops, package = "loopcityData")
-    hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
-    communities <- GM12878_10KbLoops |>
-        mergeAnchors() |>
-        connectLoopAnchors(overlapDist = 1e6) |>
-        scoreInteractions(hicFile = hicFile) |>
-        InteractionSet::interactions() |>
-        assignCommunities()
-    plotHicCommunities(
-        pdfName = tempfile(fileext = ".pdf"),
-        communities = communities,
-        hicFile = hicFile,
-        chroms = 22,
-        starts = 25e6,
-        ends = 30e6
-    )
-}
-}
+data(GM12878_10KbLoops)
+hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+communities <- GM12878_10KbLoops |>
+    mergeAnchors() |>
+    connectLoopAnchors(overlapDist = 1e6) |>
+    scoreInteractions(hicFile = hicFile) |>
+    InteractionSet::interactions() |>
+    assignCommunities()
+plotHicCommunities(
+    pdfName = tempfile(fileext = ".pdf"),
+    communities = communities,
+    hicFile = hicFile,
+    chroms = 22,
+    starts = 25e6,
+    ends = 30e6
+)
 }

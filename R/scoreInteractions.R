@@ -6,31 +6,34 @@
 #' @returns a MatrixSelection object corresponding to the keyword
 #' @noRd
 #' @keywords internal
-.pickSelection <- function(x = c("bowtie","donut"), n, buffer){
+.pickSelection <- function(x = c("bowtie", "donut"), n, buffer) {
     x <- match.arg(x)
-    switch (x,
-            bowtie = mariner::selectTopLeft(n = n, buffer = buffer) +
-                mariner::selectBottomRight(n = n, buffer = buffer),
-            donut = mariner::selectOuter(n = n, buffer = buffer)
+    switch(x,
+        bowtie = mariner::selectTopLeft(n = n, buffer = buffer) +
+            mariner::selectBottomRight(n = n, buffer = buffer),
+        donut = mariner::selectOuter(n = n, buffer = buffer)
     )
 }
 
 ## Generic for scoreInteractions
 #' @rdname scoreInteractions
 #' @export
-setGeneric("scoreInteractions",
-           function(x,
-                    hicFile,
-                    fgSize = 0,
-                    bg = "bowtie",
-                    bgGap = 0,
-                    bgSize = 5,
-                    pseudo = 5,
-                    pruneUnder = 0,
-                    truncate = FALSE,
-                    resolution,
-                    norm = "NONE")
-               standardGeneric("scoreInteractions"))
+setGeneric(
+    "scoreInteractions",
+    function(x,
+             hicFile,
+             fgSize = 0,
+             bg = "bowtie",
+             bgGap = 0,
+             bgSize = 5,
+             pseudo = 5,
+             pruneUnder = 0,
+             truncate = FALSE,
+             resolution,
+             norm = "NONE") {
+        standardGeneric("scoreInteractions")
+    }
+)
 
 
 #' Internal for scoreInteractionsFromMats
@@ -38,23 +41,27 @@ setGeneric("scoreInteractions",
 #' @importFrom mariner calcLoopEnrichment
 #' @noRd
 #' @keywords internal
-.scoreInteractionsFromMats <- function(x,fgSize,bg,bgGap,bgSize,
-                                       pseudo,pruneUnder,truncate){
-
+.scoreInteractionsFromMats <- function(x, fgSize, bg, bgGap, bgSize,
+                                       pseudo, pruneUnder, truncate) {
     ## Get buffer from counts matrices
-    buffer <- (dim(BiocGenerics::counts(x))[1] - 1)/2
+    buffer <- (dim(BiocGenerics::counts(x))[1] - 1) / 2
 
     ## Check that buffer is large enough for bg and fg
-    if(buffer < fgSize + bgGap + bgSize){
+    if (buffer < fgSize + bgGap + bgSize) {
         abort(c("`x` dimensions are too small",
-                "x"=glue('`dim(counts(x))` must be at least {fgSize+bgGap+bgSize}'),
-                "i"=glue('`dim(counts(x))` is {dim(counts(x))}'),
-                "i"="Try using a smaller value for fgSize, bgGap, or bgSize,
-                or re-run with loop and hi-c files."))
+            "x" = glue(
+                "`dim(counts(x))` must be at least {fgSize+bgGap+bgSize}"
+            ),
+            "i" = glue("`dim(counts(x))` is {dim(counts(x))}"),
+            "i" = "Try using a smaller value for fgSize, bgGap, or bgSize,
+                or re-run with loop and hi-c files."
+        ))
     }
 
     ## Select center pixel/foreground
-    cp_sel <- mariner::selectCenterPixel(mhDist = 1:fgSize, buffer = buffer)
+    cp_sel <- mariner::selectCenterPixel(
+        mhDist = seq_len(fgSize), buffer = buffer
+    )
 
     ## Select background based on bg keyword
     bg_sel <- .pickSelection(bg, n = bgSize, buffer = buffer)
@@ -63,26 +70,32 @@ setGeneric("scoreInteractions",
     x$pseudocounts <- pseudo
 
     ## Function to divide median of fg and bg with pseudocounts
-    scoringFunction <- function(fg,bg,pseudo=pseudo){
-        median((fg + 1 + pseudo)/(bg + 1 + pseudo), na.rm = TRUE)
+    scoringFunction <- function(fg, bg, pseudo = pseudo) {
+        median((fg + 1 + pseudo) / (bg + 1 + pseudo), na.rm = TRUE)
     }
 
     ## Calculate enrichment scores
-    scores <- mariner::calcLoopEnrichment(x = x, fg = cp_sel, bg = bg_sel,
-                                          FUN = scoringFunction)
+    scores <- mariner::calcLoopEnrichment(
+        x = x, fg = cp_sel, bg = bg_sel,
+        FUN = scoringFunction
+    )
 
     ## Prune away scores where the center pixels have
     ## raw counts less than pruneUnder
-    centerPx <- mariner::calcLoopEnrichment(x = x,
-                                            fg = mariner::selectCenterPixel(
-                                                0, buffer = buffer),
-                                            FUN = function(fg,bg) fg)
+    centerPx <- mariner::calcLoopEnrichment(
+        x = x,
+        fg = mariner::selectCenterPixel(
+            0,
+            buffer = buffer
+        ),
+        FUN = function(fg, bg) fg
+    )
     scores[centerPx < pruneUnder] <- NA
 
     ## truncate high scores to 99th percentile
-    if(truncate){
-        newMax <- quantile(scores,.99)
-        scores[which(scores>newMax),] <- newMax
+    if (truncate) {
+        newMax <- quantile(scores, .99)
+        scores[which(scores > newMax), ] <- newMax
     }
 
     GenomicRanges::mcols(x)$score <- scores
@@ -95,23 +108,23 @@ setGeneric("scoreInteractions",
 #' @importFrom mariner calcLoopEnrichment
 #' @noRd
 #' @keywords internal
-.scoreInteractionsFromFiles <- function(x,hicFile,fgSize,bg,bgGap,
-                                        bgSize,pseudo,pruneUnder,truncate,
-                                        resolution,norm){
-
+.scoreInteractionsFromFiles <- function(x, hicFile, fgSize, bg, bgGap,
+                                        bgSize, pseudo, pruneUnder, truncate,
+                                        resolution, norm) {
     ## get resolution from loops
-    if(missing(resolution)){
+    if (missing(resolution)) {
         uniqueWidths <- InteractionSet::regions(x) |>
             IRanges::width() |>
             unique()
-        if(length(uniqueWidths) > 1){
+        if (length(uniqueWidths) > 1) {
             abort(c("Regions in `x` must be the same resolution.",
-                    "x"=glue('`width(regions(x))` include
-                             {length(uniqueWidths)} different widths.'),
-                    "i"=glue("Providing a value for `resolution` will put
-                             regions into equal sized bins.")))
+                "x" = glue("`width(regions(x))` include
+                             {length(uniqueWidths)} different widths."),
+                "i" = glue("Providing a value for `resolution` will put
+                             regions into equal sized bins.")
+            ))
         }
-        resolution = uniqueWidths-1
+        resolution <- uniqueWidths - 1
     }
 
     ## pull hi-c contacts
@@ -119,11 +132,11 @@ setGeneric("scoreInteractions",
     buffer <- fgSize + bgGap + bgSize
 
     ## Extract matrices around each loop
-    mats <- mariner::pixelsToMatrices(x=x, buffer=buffer) |>
+    mats <- mariner::pixelsToMatrices(x = x, buffer = buffer) |>
         mariner::pullHicMatrices(
-            files=hicFile,
-            binSize=resolution,
-            half="upper",
+            files = hicFile,
+            binSize = resolution,
+            half = "upper",
             norm = norm
         )
 
@@ -131,14 +144,16 @@ setGeneric("scoreInteractions",
     InteractionSet::interactions(mats) <- x
 
     ## Pass in parameters, including optional ones, to the next function
-    args <- list(x = mats,
-                 fgSize = fgSize,
-                 bg = bg,
-                 bgGap = bgGap,
-                 bgSize = bgSize,
-                 pruneUnder = pruneUnder,
-                 truncate = truncate,
-                 pseudo = pseudo)
+    args <- list(
+        x = mats,
+        fgSize = fgSize,
+        bg = bg,
+        bgGap = bgGap,
+        bgSize = bgSize,
+        pruneUnder = pruneUnder,
+        truncate = truncate,
+        pseudo = pseudo
+    )
 
     do.call(".scoreInteractionsFromMats", args)
 }
@@ -186,20 +201,19 @@ setGeneric("scoreInteractions",
 #' @export
 #'
 #' @examples
-#' \donttest{
-#' if (requireNamespace("loopcityData", quietly = TRUE)) {
-#'     data(GM12878_10KbLoops, package = "loopcityData")
-#'     hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
-#'     mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-#'     connections <- connectLoopAnchors(mergedLoops, 1e6)
-#'     scoreInteractions(connections, hicFile)
-#' }
-#' }
+#' data(GM12878_10KbLoops)
+#' hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+#' mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
+#' connections <- connectLoopAnchors(mergedLoops, 1e6)
+#' scoreInteractions(connections, hicFile)
 #'
 setMethod("scoreInteractions",
-          signature(x="GInteractions",
-                    hicFile="character"),
-          definition=.scoreInteractionsFromFiles)
+    signature(
+        x = "GInteractions",
+        hicFile = "character"
+    ),
+    definition = .scoreInteractionsFromFiles
+)
 
 
 #' Calculate loop enrichment over background.
@@ -207,7 +221,9 @@ setMethod("scoreInteractions",
 #' @rdname scoreInteractions
 #' @export
 setMethod("scoreInteractions",
-          signature(x="InteractionArray",
-                    hicFile="missing"),
-          definition=.scoreInteractionsFromMats)
-
+    signature(
+        x = "InteractionArray",
+        hicFile = "missing"
+    ),
+    definition = .scoreInteractionsFromMats
+)

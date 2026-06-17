@@ -9,8 +9,8 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment  = "#>"
+    collapse = TRUE,
+    comment  = "#>"
 )
 ```
 
@@ -38,19 +38,22 @@ library(GenomeInfoDb)
 library(InteractionSet)
 library(mariner)
 
-hic_file   <- K562_hic()
+hic_file <- K562_hic()
 loops_file <- K562_loops()
 
 loops <- data.table::fread(loops_file) |>
     mariner::assignToBins(binSize = 10e3)
 GenomeInfoDb::seqlevelsStyle(loops) <- "ENSEMBL"
 
-merged      <- mergeAnchors(loops, pixelOverlap = 1)
-connected   <- connectLoopAnchors(merged, overlapDist = 1e6)
-scored      <- scoreInteractions(connected, hicFile = hic_file,
-                                 resolution = 10e3, norm = "NONE")
+merged <- mergeAnchors(loops, pixelOverlap = 1)
+connected <- connectLoopAnchors(merged, overlapDist = 1e6)
+scored <- scoreInteractions(connected,
+    hicFile = hic_file,
+    resolution = 10e3, norm = "NONE"
+)
 communities <- assignCommunities(interactions(scored),
-                                 leidenResolution = 0.5)
+    leidenResolution = 0.5
+)
 ```
 
 ## Visualize with plotgardener
@@ -64,14 +67,14 @@ library(plotgardener)
 library(glue)
 
 ## File paths
-ctcf_bw    <- K562_CTCF_bw()
+ctcf_bw <- K562_CTCF_bw()
 h3k27ac_bw <- K562_H3K27ac_bw()
 
 ## Region of interest — matches Figure 1b/c
-hic_chrom         <- "1"
-bw_chrom          <- "chr1"
+hic_chrom <- "1"
+bw_chrom <- "chr1"
 survey_chromstart <- 110e6
-survey_chromend   <- 115e6
+survey_chromend <- 115e6
 
 ## Shared parameters
 params <- pgParams(
@@ -87,30 +90,43 @@ params <- pgParams(
 ## Filter communities to region
 survey_region <- GenomicRanges::GRanges(
     seqnames = hic_chrom,
-    ranges   = IRanges::IRanges(start = survey_chromstart,
-                                end   = survey_chromend)
+    ranges = IRanges::IRanges(
+        start = survey_chromstart,
+        end = survey_chromend
+    )
 )
 a1_in <- GenomicRanges::countOverlaps(
-    anchors(communities, "first"), survey_region) > 0
+    anchors(communities, "first"), survey_region
+) > 0
 a2_in <- GenomicRanges::countOverlaps(
-    anchors(communities, "second"), survey_region) > 0
+    anchors(communities, "second"), survey_region
+) > 0
 loops_region <- communities[a1_in & a2_in]
 loops_region <- loops_region[
     which(loops_region$score > 0 &
-              lengths(loops_region$loopCommunity) > 0)
+        lengths(loops_region$loopCommunity) > 0)
 ]
 
 ## Assign community colours
 loopcity_colors <- function(n) {
-    rep(c("chartreuse3", "deepskyblue3", "darkorange",
-          "darkorchid2", "deeppink3"), length.out = n)
+    rep(c(
+        "chartreuse3", "deepskyblue3", "darkorange",
+        "darkorchid2", "deeppink3"
+    ), length.out = n)
 }
-comm_labels <- vapply(loops_region$loopCommunity,
-                      function(x) if (length(x) == 0L) NA_integer_
-                                  else as.integer(x[[1L]]),
-                      integer(1L))
-comm_idx              <- as.integer(factor(comm_labels))
-loops_region$color    <- loopcity_colors(max(comm_idx, na.rm=TRUE))[comm_idx]
+comm_labels <- vapply(
+    loops_region$loopCommunity,
+    function(x) {
+        if (length(x) == 0L) {
+            NA_integer_
+        } else {
+            as.integer(x[[1L]])
+        }
+    },
+    integer(1L)
+)
+comm_idx <- as.integer(factor(comm_labels))
+loops_region$color <- loopcity_colors(max(comm_idx, na.rm = TRUE))[comm_idx]
 loops_region$color[is.na(comm_labels)] <- "grey70"
 loops_region$score_lg <- as.numeric(log2(loops_region$score))
 
@@ -118,7 +134,7 @@ loops_region$score_lg <- as.numeric(log2(loops_region$score))
 pdf("figures/survey_communities.pdf", width = 9, height = 7.5)
 pageCreate(width = 9, height = 7.5, showGuides = FALSE)
 
-x     <- 0.5
+x <- 0.5
 width <- 8.0
 
 ## Hi-C contact map
@@ -127,14 +143,17 @@ hic_plot <- plotHicRectangle(
     chrom = hic_chrom, zrange = c(0, 225),
     x = x, y = 0.4, width = width, height = 2.2
 )
-annoHeatmapLegend(hic_plot, x = x - 0.25, y = 0.4,
-                  width = 0.07, height = 0.75,
-                  just = c("left","top"), default.units = "inches")
+annoHeatmapLegend(hic_plot,
+    x = x - 0.25, y = 0.4,
+    width = 0.07, height = 0.75,
+    just = c("left", "top"), default.units = "inches"
+)
 
 ## Community arches
 score_range <- range(loops_region$score_lg, na.rm = TRUE)
 plotPairsArches(
-    loops_region, params = params, chrom = hic_chrom,
+    loops_region,
+    params = params, chrom = hic_chrom,
     flip = TRUE, clip = TRUE,
     archHeight = "score_lg", range = score_range,
     x = x, y = 2.66, width = width, height = 0.75,
@@ -142,30 +161,44 @@ plotPairsArches(
 )
 
 ## CTCF signal
-plotSignal(ctcf_bw, params = params, chrom = bw_chrom,
-           x = x, y = 3.42, width = width, height = 0.45,
-           fill = "#253494", linecolor = "#253494",
-           range = c(0, 200), scale = FALSE)
-plotText("CTCF", x = x, y = 3.37, fontsize = 7, fontface = "bold",
-         fontcolor = "#253494", just = c("left","bottom"))
+plotSignal(ctcf_bw,
+    params = params, chrom = bw_chrom,
+    x = x, y = 3.42, width = width, height = 0.45,
+    fill = "#253494", linecolor = "#253494",
+    range = c(0, 200), scale = FALSE
+)
+plotText("CTCF",
+    x = x, y = 3.37, fontsize = 7, fontface = "bold",
+    fontcolor = "#253494", just = c("left", "bottom")
+)
 
 ## H3K27ac signal
-plotSignal(h3k27ac_bw, params = params, chrom = bw_chrom,
-           x = x, y = 4.05, width = width, height = 0.45,
-           fill = "#807DBA", linecolor = "#807DBA",
-           range = calcSignalRange(h3k27ac_bw, chrom = bw_chrom,
-                                   chromstart = survey_chromstart,
-                                   chromend = survey_chromend,
-                                   assembly = "hg38", negData = FALSE),
-           scale = FALSE)
-plotText("H3K27ac", x = x, y = 4.00, fontsize = 7, fontface = "bold",
-         fontcolor = "#807DBA", just = c("left","bottom"))
+plotSignal(h3k27ac_bw,
+    params = params, chrom = bw_chrom,
+    x = x, y = 4.05, width = width, height = 0.45,
+    fill = "#807DBA", linecolor = "#807DBA",
+    range = calcSignalRange(h3k27ac_bw,
+        chrom = bw_chrom,
+        chromstart = survey_chromstart,
+        chromend = survey_chromend,
+        assembly = "hg38", negData = FALSE
+    ),
+    scale = FALSE
+)
+plotText("H3K27ac",
+    x = x, y = 4.00, fontsize = 7, fontface = "bold",
+    fontcolor = "#807DBA", just = c("left", "bottom")
+)
 
 ## Genes and genome label
-plotGenes(params = params, x = x, y = 4.54,
-          width = width, height = 0.5, fontsize = 6)
-annoGenomeLabel(plot = hic_plot, x = x, y = 5.07,
-                scale = "bp", fontsize = 6)
+plotGenes(
+    params = params, x = x, y = 4.54,
+    width = width, height = 0.5, fontsize = 6
+)
+annoGenomeLabel(
+    plot = hic_plot, x = x, y = 5.07,
+    scale = "bp", fontsize = 6
+)
 
 dev.off()
 ```

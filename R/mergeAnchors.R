@@ -25,8 +25,7 @@
 #'     data(GM12878_10KbLoops, package = "loopcityData")
 #'     mergeAnchors(loops = GM12878_10KbLoops, pixelOverlap = 1)
 #' }
-
-mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
+mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE) {
     ## Suppress NSE notes in R CMD check
     subjectHits <- queryHits <- V1 <- anchorId <- overlapIds <- NULL
     sameGroup <- group <- count <- NULL
@@ -39,27 +38,30 @@ mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
         InteractionSet::regions(loops) |>
         IRanges::ranges() |>
         IRanges::width() |>
-        unique()-1
+        unique() - 1
 
-    if(length(resolution) > 1){
+    if (length(resolution) > 1) {
         rlang::abort(glue("Interaction ranges must have the same width ",
-                       "to use pixelOverlap.",
-                "x"=glue("There are {length(resolution)} different widths ",
-                         "in `ranges(regions(loops))`."),
-                "i"="Consider using bpOverlap instead."))
+            "to use pixelOverlap.",
+            "x" = glue(
+                "There are {length(resolution)} different widths ",
+                "in `ranges(regions(loops))`."
+            ),
+            "i" = "Consider using bpOverlap instead."
+        ))
     }
 
     ## Create data table of all overlapping anchor indexes
     ## (one line per overlap)
     overlaps <- loops |>
         InteractionSet::regions() |>
-        IRanges::findOverlaps(maxgap = pixelOverlap*resolution-2) |>
+        IRanges::findOverlaps(maxgap = pixelOverlap * resolution - 2) |>
         data.table::as.data.table()
 
     ## Condense overlaps into list of all overlapping anchor indexes
     ## (one line per unique anchor)
     ## & give each chain a group number
-    overlapGroups <- overlaps[, .(list(subjectHits)), by=queryHits] |>
+    overlapGroups <- overlaps[, .(list(subjectHits)), by = queryHits] |>
         dplyr::rename(anchorId = queryHits, overlapIds = V1) |>
         dplyr::rowwise() |>
         dplyr::mutate(sameGroup = anchorId %in% dplyr::lead(overlapIds)) |>
@@ -77,17 +79,23 @@ mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
 
     ## helper function to pick the middle value of a vector
     ## (or the largest of 2 middle vals)
-    middle <- function(x) {x[floor(length(x)/2) + 1]}
+    middle <- function(x) {
+        x[floor(length(x) / 2) + 1]
+    }
 
-    ## For each group of anchors, collect all anchor IDs with the maximum counts (modes)
+    ## For each group of anchors, collect all anchor IDs with the
+    ## maximum counts (modes)
     ## If there is only one mode, that is the representative anchor
     ## If there is more than one mode, choose the middle-est one
     representativeAnchors <- overlapGroups |>
         dplyr::group_by(group) |>
-        dplyr::mutate(repAnchorId = {modes <- anchorId[count == max(count)];
-        ifelse(length(modes) > 1,
-               middle(modes),
-               modes)})
+        dplyr::mutate(repAnchorId = {
+            modes <- anchorId[count == max(count)]
+            ifelse(length(modes) > 1,
+                middle(modes),
+                modes
+            )
+        })
 
     ## Replace original loop anchor IDs with new anchor IDs and create
     ## new GInteractions object
@@ -96,20 +104,22 @@ mergeAnchors <- function(loops, pixelOverlap = 1, dropDups = TRUE){
         InteractionSet::regions(loops)[representativeAnchors$repAnchorId]
 
     mergedLoops <- InteractionSet::GInteractions(
-        anchor1 = InteractionSet::anchors(mergedLoops, 'first'),
-        anchor2 = InteractionSet::anchors(mergedLoops, 'second'))
+        anchor1 = InteractionSet::anchors(mergedLoops, "first"),
+        anchor2 = InteractionSet::anchors(mergedLoops, "second")
+    )
 
     ## Remove duplicates and give a message of how many interactions were
     ## dropped, if `dropDups` == TRUE
-    if(dropDups){
-        if(length(mergedLoops) != length(unique(mergedLoops))){
-            message(glue("Duplicates dropped. {length(mergedLoops)} ",
-                         "interactions reduced to {length(unique(mergedLoops))}",
-                         " interactions."))
+    if (dropDups) {
+        if (length(mergedLoops) != length(unique(mergedLoops))) {
+            message(glue(
+                "Duplicates dropped. {length(mergedLoops)} ",
+                "interactions reduced to {length(unique(mergedLoops))}",
+                " interactions."
+            ))
         }
 
         return(unique(mergedLoops))
-
     } else {
         return(mergedLoops)
     }

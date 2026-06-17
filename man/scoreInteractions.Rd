@@ -87,14 +87,10 @@ and the median of the foreground over the background is added as a score for
 each given interaction.
 }
 \examples{
-\donttest{
-if (requireNamespace("loopcityData", quietly = TRUE)) {
-    data(GM12878_10KbLoops, package = "loopcityData")
-    hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
-    mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-    connections <- connectLoopAnchors(mergedLoops, 1e6)
-    scoreInteractions(connections, hicFile)
-}
-}
+data(GM12878_10KbLoops)
+hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
+mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
+connections <- connectLoopAnchors(mergedLoops, 1e6)
+scoreInteractions(connections, hicFile)
 
 }

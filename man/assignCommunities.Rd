@@ -36,14 +36,8 @@ GInteractions object with community metadata
 Assign communities to interactions
 }
 \examples{
-\donttest{
-if (requireNamespace("loopcityData", quietly = TRUE)) {
-    data(GM12878_10KbLoops, package = "loopcityData")
-    hicFile <- system.file("extdata", "GM12878_chr22.hic", package = "loopcity")
-    mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
-    connections <- connectLoopAnchors(mergedLoops, 1e6)
-    scores <- scoreInteractions(connections, hicFile)
-    assignCommunities(InteractionSet::interactions(scores))
-}
-}
+data(GM12878_10KbLoopsChr21)
+loops <- GM12878_10KbLoopsChr21
+loops$score <- loops$value
+assignCommunities(loops, pruneUnder = 0)
 }

@@ -25,8 +25,9 @@ loopcity is currently being submitted to [Bioconductor](https://www.bioconductor
 You can install the development version of loopcity from [GitHub](https://github.com/) with:
 
 ```{r installation, eval = F}
-if (!requireNamespace("remotes", quietly = TRUE))
+if (!requireNamespace("remotes", quietly = TRUE)) {
     install.packages("remotes")
+}
 
 remotes::install_github("sarmapar/loopcity")
 ```

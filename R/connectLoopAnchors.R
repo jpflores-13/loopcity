@@ -1,8 +1,8 @@
 #' connectLoopAnchors
 #'
 #' @param loops GInteractions object of loops
-#' @param overlapDist an integer representing the farthest distance in base pairs
-#' to make a connection
+#' @param overlapDist an integer representing the farthest distance in
+#' base pairs to make a connection
 #'
 #' @return GInteractions object
 #' @export
@@ -13,7 +13,7 @@
 #'     mergedLoops <- mergeAnchors(GM12878_10KbLoops, 1)
 #'     connectLoopAnchors(mergedLoops, 1e6)
 #' }
-connectLoopAnchors <- function(loops, overlapDist){
+connectLoopAnchors <- function(loops, overlapDist) {
     ## Suppress NSE notes in R CMD check
     queryHits <- subjectHits <- NULL
 
@@ -33,7 +33,8 @@ connectLoopAnchors <- function(loops, overlapDist){
     ## Remove duplicates
     newInteractions <- InteractionSet::GInteractions(
         anchor1 = anchors[overlaps$queryHits],
-        anchor2 = anchors[overlaps$subjectHits]) |>
+        anchor2 = anchors[overlaps$subjectHits]
+    ) |>
         InteractionSet::swapAnchors(mode = "order") |>
         unique()
 
@@ -48,5 +49,3 @@ connectLoopAnchors <- function(loops, overlapDist){
 
     return(newInteractions)
 }
-
-

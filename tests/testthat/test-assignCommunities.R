@@ -1,16 +1,19 @@
 ### Setup inputs
 hicfile <- system.file("extdata", "GM12878_chr22.hic",
-                       package = "loopcity")
+    package = "loopcity"
+)
 
 loops <- GM12878_10KbLoops
 GenomeInfoDb::seqlevelsStyle(loops) <- "ENSEMBL"
 
 connections <- connectLoopAnchors(loops, 1e6)
 
-scores <- scoreInteractions(x = connections,
-                            hicFile = hicfile,
-                            norm = "NONE",
-                            pseudo = 5)
+scores <- scoreInteractions(
+    x = connections,
+    hicFile = hicfile,
+    norm = "NONE",
+    pseudo = 5
+)
 
 loops_with_scores <- InteractionSet::interactions(scores)
 
@@ -19,41 +22,47 @@ test_that("assignCommunities generates GInteractions", {
         expect_s4_class("GInteractions")
 })
 
-test_that("Various cluster types can be used",{
+test_that("Various cluster types can be used", {
     ## fast greedy
     assignCommunities(loops_with_scores,
-                      clusterType = "fast_greedy") |>
+        clusterType = "fast_greedy"
+    ) |>
         expect_s4_class("GInteractions")
 
     ## walktrap
     assignCommunities(loops_with_scores,
-                      clusterType = "walktrap") |>
+        clusterType = "walktrap"
+    ) |>
         expect_s4_class("GInteractions")
 
     ## infomap
     assignCommunities(loops_with_scores,
-                      clusterType = "infomap") |>
+        clusterType = "infomap"
+    ) |>
         expect_s4_class("GInteractions")
 
     ## label prop
     assignCommunities(loops_with_scores,
-                      clusterType = "label_prop") |>
+        clusterType = "label_prop"
+    ) |>
         expect_s4_class("GInteractions")
 
     ## edge betweenness
     assignCommunities(loops_with_scores,
-                      clusterType = "edge_betweenness") |>
+        clusterType = "edge_betweenness"
+    ) |>
         expect_warning("highest modularity")
 
     ## invalid cluster type
     assignCommunities(loops_with_scores,
-                      clusterType = "random_mess") |>
+        clusterType = "random_mess"
+    ) |>
         expect_error("not a valid clustering algorithm")
 })
 
 test_that("loops are checked correctly", {
     ## loops must be a GInteractions object
-    test_df <- data.frame(x = c(1,2,3), y = c(3,6,9))
+    test_df <- data.frame(x = c(1, 2, 3), y = c(3, 6, 9))
     test_char <- "test"
 
     assignCommunities(test_char) |>
@@ -66,7 +75,7 @@ test_that("loops are checked correctly", {
 test_that("scores are checked correctly", {
     ## `scores` must be a column in `loops` or a numeric vector
     ## of the same length
-    test_scores <- c(2,4,6,8,10)
+    test_scores <- c(2, 4, 6, 8, 10)
     assignCommunities(loops_with_scores, score = test_scores) |>
         expect_error("must be the same length")
 
@@ -75,7 +84,7 @@ test_that("scores are checked correctly", {
         expect_error("must be a numeric vector")
 
     ## Providing scores overwrites `score` column in `loops`
-    ##TODO: this test isn't actually testing that the right scores are being used...
+    ## TODO: this test isn't actually testing that the right scores are being used...
     test_scores_correct <- 1:length(loops_with_scores)
     assignCommunities(loops_with_scores, score = test_scores_correct) |>
         expect_s4_class("GInteractions")
@@ -90,27 +99,34 @@ test_that("scores are checked correctly", {
     set.seed(555)
     scoresInLoopsOutput <- assignCommunities(loops_with_scores)
     scoresSeperateOutput <- assignCommunities(loops_without_scores,
-                                              scores = as.numeric(
-                                                  loops_with_scores$score))
+        scores = as.numeric(
+            loops_with_scores$score
+        )
+    )
 
-    expect_identical(scoresInLoopsOutput$loopCommunity,
-                     scoresSeperateOutput$loopCommunity)
+    expect_identical(
+        scoresInLoopsOutput$loopCommunity,
+        scoresSeperateOutput$loopCommunity
+    )
 })
 
 test_that("leiden_resolution checks work properly", {
     ## Give a warning if leidenResolution is provided but not used
     assignCommunities(loops_with_scores,
-                      clusterType = "fast_greedy",
-                      leidenResolution = 0.5) |>
+        clusterType = "fast_greedy",
+        leidenResolution = 0.5
+    ) |>
         expect_warning("will not be used")
 
     ## Give a warning if more than one resolution is provided
     assignCommunities(loops_with_scores,
-                      leidenResolution = c(1,2,3)) |>
+        leidenResolution = c(1, 2, 3)
+    ) |>
         expect_warning("first will be used")
 
     ## Error if leidenResolution is not numeric
     assignCommunities(loops_with_scores,
-                      leidenResolution = "test") |>
+        leidenResolution = "test"
+    ) |>
         expect_error("must be numeric")
 })

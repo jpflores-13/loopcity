@@ -2,9 +2,13 @@ Package: loopcity
 Type: Package
 Title: Call Chromatin Communities From Hi-C Data
 Version: 0.1.0
-Authors@R: person("Sarah", "Parker", role = c("aut", "cre"),
-      email = "smp3800@gmail.com",
-      comment = c(ORCID = "0000-0002-2700-3979"))
+Authors@R: c(
+    person("Sarah", "Parker", role = c("aut", "cre"),
+        email = "smp3800@gmail.com",
+        comment = c(ORCID = "0000-0002-2700-3979")),
+    person("Howard Hughes Medical Institute", role = "fnd"),
+    person("National Institutes of Health", role = "fnd"),
+    person("National Science Foundation", role = "fnd"))
 Description: Tools for assigning and visualizing chromatin community interactions from Hi-C data.
 License: AGPL (>= 3)
 Encoding: UTF-8
@@ -34,7 +38,7 @@ Imports:
     stats,
     S4Vectors
 Depends:
-    R (>= 4.1.0)
+    R (>= 4.6.0)
 biocViews: Software, HiC, Sequencing, Epigenetics, Network, Clustering,
     Visualization
 BugReports: https://github.com/sarmapar/loopcity/issues

@@ -9,8 +9,8 @@ connectLoopAnchors(loops, overlapDist)
 \arguments{
 \item{loops}{GInteractions object of loops}
 
-\item{overlapDist}{an integer representing the farthest distance in base pairs
-to make a connection}
+\item{overlapDist}{an integer representing the farthest distance in
+base pairs to make a connection}
 }
 \value{
 GInteractions object

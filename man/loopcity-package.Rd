@@ -22,5 +22,17 @@ Useful links:
 \author{
 \strong{Maintainer}: Sarah Parker \email{smp3800@gmail.com} (\href{https://orcid.org/0000-0002-2700-3979}{ORCID})
 
+Authors:
+\itemize{
+  \item Sarah Parker \email{smp3800@gmail.com} (\href{https://orcid.org/0000-0002-2700-3979}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Howard Hughes Medical Institute [funder]
+  \item National Institutes of Health [funder]
+  \item National Science Foundation [funder]
+}
+
 }
 \keyword{internal}
