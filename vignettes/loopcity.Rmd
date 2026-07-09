@@ -21,15 +21,24 @@ library(loopcity)
 library(loopcityData)
 ```
 
+# Introduction
+
+`loopcity` is an R package for identifying and visualizing chromatin loop
+communities from Hi-C data. Starting from a set of loop calls and a `.hic`
+contact matrix, it merges redundant anchors, connects neighboring anchors into
+a network, scores each interaction by Hi-C signal enrichment, and assigns loops
+to communities using graph clustering. Results can be visualized as colored
+arches overlaid on Hi-C maps.
+
 # Installation
 
-This package can be installed via Github:
+`loopcity` can be installed from Bioconductor:
 
 ```{r installPackage, eval=FALSE}
-if (!requireNamespace("remotes", quietly = TRUE)) {
-    install.packages("remotes")
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
 }
-remotes::install_github("sarmapar/loopcity")
+BiocManager::install("loopcity")
 ```
 
 # loopcity Pipeline
