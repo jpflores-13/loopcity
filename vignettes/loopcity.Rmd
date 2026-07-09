@@ -4,7 +4,7 @@ author: "Sarah Parker"
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{loopcity}
+  %\VignetteIndexEntry{Using loopcity}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -229,7 +229,7 @@ plotHicCommunities(
 )
 ```
 
-![](img/plot.png){width="100%"}
+![Hi-C map with loop communities visualized as colored arches](img/plot.png){width="100%"}
 
 ```{r sessionInfo}
 sessionInfo()

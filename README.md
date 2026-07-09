@@ -51,7 +51,7 @@ remotes::install_github("sarmapar/loopcity")
 
 ## Overview
 
-![](man/figures/Fig1.png) **Loopcity detects chromatin communities from
+![Overview of the loopcity pipeline showing chromatin community detection from Hi-C data](man/figures/Fig1.png) **Loopcity detects chromatin communities from
 Hi-C data.** (a) Schematic overview of the main loopcity functions.
 (From top to bottom) Nearby anchors are merged to create network nodes,
 edges are added to connect all nearby nodes, edge weights are added
