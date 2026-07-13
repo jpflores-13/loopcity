@@ -317,8 +317,8 @@ assignCommunities <- function(loops,
             dplyr::filter(anchorCommunity == comm) |>
             plyranges::as_granges()
 
-        ln <- .compareNodeToComm(loops, nodeLeft, TRUE)
-        rn <- .compareNodeToComm(loops, nodeRight, FALSE)
+        ln <- .compareNodeToComm(loops, nodeLeft, TRUE, comm)
+        rn <- .compareNodeToComm(loops, nodeRight, FALSE, comm)
 
         movement <- c(movement, ln, rn)
     }

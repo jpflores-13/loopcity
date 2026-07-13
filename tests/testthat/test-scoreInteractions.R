@@ -1,3 +1,6 @@
+skip_if_not_installed("loopcityData")
+library(loopcityData)
+
 test_that("scores are generated", {
     hicfile <- system.file("extdata", "GM12878_chr22.hic",
         package = "loopcity"

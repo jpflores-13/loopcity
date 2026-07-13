@@ -1,4 +1,7 @@
 ### Setup inputs
+skip_if_not_installed("loopcityData")
+library(loopcityData)
+
 hicfile <- system.file("extdata", "GM12878_chr22.hic",
     package = "loopcity"
 )
@@ -108,6 +111,21 @@ test_that("scores are checked correctly", {
         scoresInLoopsOutput$loopCommunity,
         scoresSeperateOutput$loopCommunity
     )
+})
+
+test_that("loopCommunity is the intersection of its anchors' communities", {
+    result <- assignCommunities(loops_with_scores)
+
+    anc1_comm <- InteractionSet::regions(result)[
+        InteractionSet::anchorIds(result)$first
+    ]$anchorCommunity
+
+    anc2_comm <- InteractionSet::regions(result)[
+        InteractionSet::anchorIds(result)$second
+    ]$anchorCommunity
+
+    expected <- mapply(intersect, anc1_comm, anc2_comm)
+    expect_identical(result$loopCommunity, expected)
 })
 
 test_that("leiden_resolution checks work properly", {
