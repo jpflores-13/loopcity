@@ -128,6 +128,35 @@ test_that("loopCommunity is the intersection of its anchors' communities", {
     expect_identical(result$loopCommunity, expected)
 })
 
+test_that("border-adjustment rescues an anchor when it scores better with the neighboring community", {
+    ## Deterministic example, independent of real Hi-C data or clustering
+    ## randomness: 4 anchors on chr1, A-B assigned to community 1, C-D to
+    ## community 2. The B-C loop (score 10) is the only loop connecting
+    ## border anchor B to community 2, and scores higher than the only loop
+    ## inside community 1 (A-B, score 5) -- so B should be rescued into both
+    ## communities. This directly exercises the logic flagged by reviewer 2:
+    ## `comm` must be passed explicitly, and community membership must be
+    ## read from `anchorCommunity` (not the not-yet-assigned `loopCommunity`).
+    regions <- GenomicRanges::GRanges(
+        "chr1",
+        IRanges::IRanges(start = c(1, 20001, 40001, 60001), width = 10000)
+    )
+    regions$anchorCommunity <- c(1, 1, 2, 2)
+
+    gi <- InteractionSet::GInteractions(
+        anchor1 = c(1, 2, 3),
+        anchor2 = c(2, 3, 4),
+        regions = regions
+    )
+    gi$score <- c(5, 10, 5)
+
+    borderNode <- InteractionSet::regions(gi)[2]
+
+    result <- .compareNodeToComm(gi, borderNode, left = FALSE, comm = 1)
+
+    expect_identical(sort(unlist(result$anchorCommunity)), c(1, 2))
+})
+
 test_that("leiden_resolution checks work properly", {
     ## Give a warning if leidenResolution is provided but not used
     assignCommunities(loops_with_scores,
