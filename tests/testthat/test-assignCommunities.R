@@ -1,6 +1,6 @@
 ### Setup inputs
 skip_if_not_installed("loopcityData")
-library(loopcityData)
+data("GM12878_10KbLoops", package = "loopcityData", envir = environment())
 
 hicfile <- system.file("extdata", "GM12878_chr22.hic",
     package = "loopcity"

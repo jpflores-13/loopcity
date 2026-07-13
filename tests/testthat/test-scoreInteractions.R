@@ -1,5 +1,5 @@
 skip_if_not_installed("loopcityData")
-library(loopcityData)
+data("GM12878_10KbLoops", package = "loopcityData", envir = environment())
 
 test_that("scores are generated", {
     hicfile <- system.file("extdata", "GM12878_chr22.hic",
@@ -15,8 +15,7 @@ test_that("scores are generated", {
     connections <- connectLoopAnchors(mergedLoops, 1e6)
 
     scores <- scoreInteractions(
-        x = connections, hicFile = hicfile, norm = "NONE",
-        loopCalls = mergedLoops
+        x = connections, hicFile = hicfile, norm = "NONE"
     )
 
 

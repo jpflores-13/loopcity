@@ -8,7 +8,7 @@
 #' "walktrap", "leiden", "infomap", "label_prop", or "edge_betweenness"
 #' @param leidenResolution numeric between 0 and 1, higher resolutions lead to
 #' more smaller communities, while lower resolutions lead to fewer larger
-#' communities. See `resolution_parameter` in `igraph::cluster_leiden`
+#' communities. See `resolution` in `igraph::cluster_leiden`
 #' @param pruneUnder numeric, added loops with scores less than this value will
 #' be removed
 #'
@@ -180,6 +180,11 @@ assignCommunities <- function(loops,
 
     message(glue("Pruning added loops with a score less than {pruneUnder}"))
 
+    ## Ensure loops$score reflects the (possibly pruned) scores so that
+    ## .compareNodeToComm can compute medians even when scores were passed
+    ## separately rather than as a column in loops
+    loops$score <- scores
+
     ## Set nodes to anchors and edges to scores
     anc <- InteractionSet::anchors(loops, type = "both", id = TRUE)
 
@@ -246,8 +251,7 @@ assignCommunities <- function(loops,
                     igraph::cluster_leiden(g_filter,
                         weights = relations_filter$weights,
                         objective_function = "CPM",
-                        resolution_parameter =
-                            leidenResolution,
+                        resolution = leidenResolution,
                         n_iterations = 5
                     ),
                 infomap =

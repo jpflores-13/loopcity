@@ -63,8 +63,6 @@
 #' @noRd
 #' @keywords internal
 .compareNodeToComm <- function(loops, borderNode, left, comm) {
-    ## Suppress NSE notes in R CMD check
-    queryHits <- loopCommunity <- score <- NULL
 
     ## Find loops that contain the borderNode (overlaps 1) and anchors in
     ## the neighboring community (overlaps 2)
@@ -100,17 +98,22 @@
     ## Compare the median score of all interactions within the neighboring
     ## community (comm_med) to all interactions between the border node and
     ## anchors in the neighboring community (node_med)
-    filtered_scores <- loops$score[queryHits(interactions_to_keep)]
-    node_med <- filtered_scores |> median()
+    filtered_scores <- loops$score[S4Vectors::queryHits(interactions_to_keep)]
+    node_med <- median(filtered_scores, na.rm = TRUE)
 
-    comm_med <- loops |>
-        as.data.frame() |>
-        dplyr::filter(loopCommunity == comm) |>
-        dplyr::pull(score) |>
-        median()
+    ## Derive comm_med from anchorCommunity on regions — loopCommunity is
+    ## not yet set on loops at the time this function is called
+    anc1_comm <- InteractionSet::regions(loops)[
+        InteractionSet::anchorIds(loops)$first
+    ]$anchorCommunity
+    anc2_comm <- InteractionSet::regions(loops)[
+        InteractionSet::anchorIds(loops)$second
+    ]$anchorCommunity
+    in_comm <- which(anc1_comm == comm & anc2_comm == comm)
+    comm_med <- median(loops$score[in_comm], na.rm = TRUE)
 
     ## If node_med >= comm_med, assign the border node to both communities
-    if (!is.na(node_med) & node_med >= comm_med) {
+    if (isTRUE(node_med >= comm_med)) {
         if (left) {
             borderNode$anchorCommunity <- list(c(
                 comm - 1,
