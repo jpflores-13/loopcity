@@ -9,3 +9,4 @@ outputs/*
 inst/doc
 data/processed/
 vignettes/*.png
+*.BiocCheck/

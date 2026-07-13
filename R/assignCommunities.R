@@ -303,7 +303,7 @@ assignCommunities <- function(loops,
         dplyr::slice_tail(n = 1)
 
     ## TODO replace for loop with map
-    communityNums <- unique(loops$loopCommunity) |>
+    communityNums <- unique(InteractionSet::regions(loops)$anchorCommunity) |>
         na.omit() |>
         as.numeric()
 
