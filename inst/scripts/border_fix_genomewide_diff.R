@@ -37,7 +37,7 @@
 ## versions of assignCommunities.R/utils.R via `git show`. This is likely a
 ## different path than `project_dir` below if data and package source live
 ## in separate directories on the cluster.
-loopcity_repo_dir <- "/work/users/j/p/jpflores/projects/loopcity_pkg"
+loopcity_repo_dir <- "/work/users/j/p/jpflores/projects/loopcity"
 
 project_dir <- "/work/users/j/p/jpflores/projects/loopcity"
 data_dir    <- file.path(project_dir, "data")

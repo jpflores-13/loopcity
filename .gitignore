@@ -10,3 +10,6 @@ inst/doc
 data/processed/
 vignettes/*.png
 *.BiocCheck/
+*.tar.gz
+*.Rcheck/
+.batch_logs/
