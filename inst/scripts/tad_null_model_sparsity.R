@@ -70,7 +70,6 @@ library(GenomeInfoDb)
 library(GenomicRanges)
 library(ggplot2)
 library(glue)
-library(gridExtra)
 library(igraph)
 library(InteractionSet)
 library(loopcity)
@@ -102,7 +101,10 @@ if (file.exists(communities_rds)) {
 
 ## Arrowhead bedpe: V1:V3 = anchor1 (chr,start,end), V4:V6 = anchor2,
 ## V12 = score. A TAD's genomic span is anchor1$start to anchor2$end.
-tad_raw <- data.table::fread(tad_file)
+## skip = 2: juicer_tools 2.x prefixes output with a "#chr1 x1 x2..." column
+## header line and a "# juicer_tools version..." comment line, both of which
+## confuse fread's header autodetection if left in.
+tad_raw <- data.table::fread(tad_file, skip = 2, header = FALSE)
 tad_gr <- GenomicRanges::GRanges(
   seqnames = tad_raw$V1,
   ranges   = IRanges::IRanges(start = tad_raw$V2 + 1, end = tad_raw$V6),
@@ -164,18 +166,32 @@ keep_vertices <- which(!is.na(tad_membership))
 g_sub <- igraph::induced_subgraph(g, keep_vertices)
 com_sub <- tad_membership[keep_vertices]
 
+## clustAnalytics's community functions require contiguous 1:k labels (they
+## index communities positionally); tadId has gaps because many TADs have no
+## overlapping anchors. Remap to contiguous labels for the call, keeping
+## tad_ids_present to translate back to genomic TAD identity in the output.
+tad_ids_present <- sort(unique(com_sub))
+com_contig <- match(com_sub, tad_ids_present)
+
+## clustAnalytics::internal_density()/edges_inside() build a weighted copy of
+## the graph internally but then (a package bug) compute the edge list from
+## the original, unweighted graph if it has no "weight" attribute -- silently
+## returning garbage values instead of erroring. Set weight explicitly so
+## they never hit that path.
+g_sub <- igraph::set_edge_attr(g_sub, "weight", value = 1)
+
 
 # Compute sparsity per TAD --------------------------------------------------
 
 ## internal_density = observed edges / all possible pairs within the group.
 ## The naive null (fully connected graph) has density 1 by construction, so
 ## 1 - density is exactly "how much sparser" loopcity's network is.
-tad_density <- clustAnalytics::internal_density(g_sub, com_sub)
-tad_edges   <- clustAnalytics::edges_inside(g_sub, com_sub)
-tad_sizes   <- as.integer(table(factor(com_sub, levels = sort(unique(com_sub)))))
+tad_density <- clustAnalytics::internal_density(g_sub, com_contig)
+tad_edges   <- clustAnalytics::edges_inside(g_sub, com_contig)
+tad_sizes   <- as.integer(table(factor(com_contig, levels = seq_along(tad_ids_present))))
 
 tad_sparsity <- data.frame(
-  tadId          = sort(unique(com_sub)),
+  tadId          = tad_ids_present,
   n_anchors      = tad_sizes,
   possible_edges = choose(tad_sizes, 2),
   observed_edges = tad_edges,
@@ -191,59 +207,63 @@ data.table::fwrite(tad_sparsity,
 
 # Summary stats + manuscript sentence ---------------------------------------
 
-med_density  <- median(tad_sparsity$density, na.rm = TRUE)
-med_sparsity <- 1 - med_density
+mean_density  <- mean(tad_sparsity$density, na.rm = TRUE)
+mean_sparsity <- 1 - mean_density
 
 message(glue(
-  "Median density across {nrow(tad_sparsity)} TADs: ",
-  "{round(med_density, 4)} ",
+  "Mean density across {nrow(tad_sparsity)} TADs: ",
+  "{round(mean_density, 4)} ",
   "(naive fully-connected null = 1)"
 ))
 
 cat(glue(
   "Compared to a naive null model in which all merged loop anchors within ",
-  "a TAD form a fully connected graph, loopcity's community-detected ",
-  "network retained a median of only {round(med_density * 100, 2)}% of ",
-  "possible anchor-anchor edges per TAD (n = {nrow(tad_sparsity)} TADs), ",
-  "a {round(med_sparsity * 100, 1)}% reduction in edge density."
+  "a TAD form a fully connected graph (mean density = 1 by construction), ",
+  "loopcity's community-detected network had a mean density of only ",
+  "{round(mean_density, 2)} across {nrow(tad_sparsity)} TADs, a ",
+  "{round(mean_sparsity * 100, 1)}% reduction in edge density relative to ",
+  "the naive null."
 ), "\n\n")
 
 
 # Visualization -------------------------------------------------------------
 
-## Panel 1: observed edges vs. naive null (choose(k,2)) as a function of
-## TAD size — null grows quadratically, loopcity's kept edges grow far slower
-p1 <- ggplot(tad_sparsity, aes(x = n_anchors)) +
-  geom_function(fun = function(k) choose(k, 2),
-                aes(color = "Naive null (fully connected)"),
-                linewidth = 0.8) +
-  geom_point(aes(y = observed_edges, color = "loopcity (post community detection)"),
-             alpha = 0.5, size = 1.2) +
-  scale_x_log10() +
-  scale_y_log10() +
-  scale_color_manual(values = c(
-    "Naive null (fully connected)" = "grey60",
-    "loopcity (post community detection)" = "deepskyblue3"
-  )) +
-  labs(x = "Merged anchors per TAD", y = "Edges",
-       color = NULL,
-       title = "Observed edges vs. naive fully-connected null, per TAD") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom")
+loopcity_color <- "#2a78d6"  # blue -- loopcity (observed)
 
-## Panel 2: distribution of per-TAD density vs. the null's density of 1
-p2 <- ggplot(tad_sparsity, aes(x = density)) +
-  geom_histogram(bins = 40, fill = "deepskyblue3", color = "white") +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "grey40") +
-  annotate("text", x = 1, y = Inf, label = "naive null density = 1",
+## Density by TAD-size bin vs. the null's density of 1. A raw
+## histogram of density is misleading here: small TADs have few possible
+## anchor pairs (choose(k,2)), so density can only take a handful of discrete
+## values (e.g. exactly 0 or 1 for a 2-anchor TAD) -- producing spiky,
+## multimodal-looking bars that are a combinatorial artifact, not biology.
+## Binning by TAD size and boxplotting shows sparsity holds across size
+## classes, not just among small, discretization-prone TADs.
+tad_sparsity$size_bin <- cut(
+  tad_sparsity$n_anchors,
+  breaks = c(1, 3, 6, 10, Inf),
+  labels = c("2-3", "4-6", "7-10", "11+")
+)
+
+## Direct-label each box with its median so the headline numbers are legible
+## without having to visually read quartiles off the plot.
+box_medians <- tad_sparsity |>
+  dplyr::group_by(size_bin) |>
+  dplyr::summarize(med = median(density), .groups = "drop")
+
+p2 <- ggplot(tad_sparsity, aes(x = size_bin, y = density)) +
+  geom_boxplot(fill = loopcity_color, alpha = 0.6, outlier.alpha = 0.3, width = 0.6) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "grey40") +
+  annotate("text", x = Inf, y = 1, label = "naive null density = 1",
            hjust = 1.05, vjust = 1.5, size = 3, color = "grey40") +
-  labs(x = "Internal density (observed edges / possible edges)",
-       y = "Number of TADs",
-       title = "Per-TAD network density after loopcity community detection") +
+  geom_text(data = box_medians, aes(x = size_bin, y = med, label = sprintf("%.2f", med)),
+            vjust = -1, size = 3.2, fontface = "bold", color = "grey20",
+            inherit.aes = FALSE) +
+  scale_y_continuous(limits = c(0, 1.08), breaks = seq(0, 1, 0.25)) +
+  labs(x = "Merged anchors per TAD", y = "Internal density (observed / possible edges)",
+       title = "Network density by TAD size") +
   theme_bw(base_size = 11)
 
-pdf(file.path(output_dir, "tad_null_model_sparsity.pdf"), width = 7, height = 8)
-gridExtra::grid.arrange(p1, p2, ncol = 1)
+pdf(file.path(output_dir, "tad_null_model_sparsity.pdf"), width = 6, height = 4.5)
+print(p2)
 dev.off()
 
 
