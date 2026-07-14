@@ -13,3 +13,8 @@ vignettes/*.png
 *.tar.gz
 *.Rcheck/
 .batch_logs/
+
+# Reviewer-response materials (BioC resubmission) — kept locally, not in the package
+inst/scripts/tad_null_model_sparsity.R
+figures/tad_null_model_sparsity.pdf
+inst/scripts/call_tads_arrowhead.sbatch

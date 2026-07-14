@@ -7,7 +7,7 @@
     gid_seqinfo <- GenomeInfoDb::seqinfo
     if (!existsMethod(gid_seqinfo, "GInteractions")) {
         setMethod(gid_seqinfo, "GInteractions", function(x) {
-            getFromNamespace("seqinfo", "Seqinfo")(InteractionSet::regions(x))
+            GenomeInfoDb::seqinfo(InteractionSet::regions(x))
         })
     }
 }
